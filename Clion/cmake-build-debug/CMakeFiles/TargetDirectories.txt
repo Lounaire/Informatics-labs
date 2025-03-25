@@ -1,0 +1,3 @@
+/Users/ilalapustin/coding/Clion/cmake-build-debug/CMakeFiles/Clion.dir
+/Users/ilalapustin/coding/Clion/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/ilalapustin/coding/Clion/cmake-build-debug/CMakeFiles/rebuild_cache.dir
