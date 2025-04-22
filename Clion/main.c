@@ -33,14 +33,14 @@ void loadFromFile();
 void clearBuffer();
 void displayMenu();
 void clearSreen();
-
+void deleteLoadedFile();
 
 
 int main(void) {
     int choice;
 
     // Загружаем данные из файла при запуске
-    loadFromFile();
+    //loadFromFile();
 
     do {
         displayMenu();
@@ -71,15 +71,28 @@ int main(void) {
                 break;
 
             case 6:
+                loadFromFile();
+                break;
+            case 7:
                 addMultipleStudents();
+                break;
+            case 8:
+                deleteLoadedFile();
                 break;
 
             case 0:
-                saveToFile();
-                printf("Программа завершена.\n");
+                printf("Программа завершается. Текущие данные не будут сохранены автоматически.\n");
+                printf("Если вы хотите сохранить данные, выберите пункт 5 в меню.\n");
+                printf("Вы действительно хотите выйти? (1 - да, 0 - нет): ");
+                int confirm;
+                scanf("%d", &confirm);
+                clearBuffer();
+                if (!confirm) {
+                    choice = -1; // Возвращаемся в меню
+                }else {
+                    printf("Программа завершена.\n");
+                }
                 break;
-            default:
-                printf("Неверный выбор. Попробуйте снова.\n");
         }
 
     } while (choice != 0);
@@ -103,7 +116,9 @@ void displayMenu() {
     printf("3. Показать всех студентов\n");
     printf("4. Поиск студента\n");
     printf("5. Сохранить в файл\n");
-    printf("6. Добавить несколько студентов\n");
+    printf("6. Загрузить из файла\n");
+    printf("7. Добавить несколько студентов\n");
+    printf("8. Удалить файл с базой данных\n");
     printf("0. Выйти\n");
 }
 
@@ -307,7 +322,7 @@ void saveToFile(){
 void loadFromFile() {
     FILE *file = fopen("students.dat", "rb");
     if (file == NULL) {
-        printf("Файл не найден. Создана новая база данных.\n");
+        printf("Файл данных не найден или не может быть открыт.\n");
         return;
     }
 
@@ -329,52 +344,98 @@ void clearSreen() {
 }
 
 void addMultipleStudents() {
-    int count;
-
     if (studentCount > 0) {
         printf("База данных не пуста. Добавление нескольких студентов невозможно.\n");
         return;
     }
 
-    printf("Введите количество студентов для добавления: ");
-    scanf("%d", &count);
-    clearBuffer();
+    int answer = 1;
+    int startCount = studentCount;
 
-    if (count <= 0) {
-        printf("Неверное количество студентов.\n");
-        return;
+    do {
+        printf("\nСтудент %d:\n", studentCount + 1);
+        addStudent(); // Переиспользуем существующую функцию
+
+        if (studentCount > startCount) { // Проверяем, был ли добавлен студент
+            printf("Желаете продолжить ввод? (1 - да, 0 - нет): ");
+            if (scanf("%d", &answer) != 1) {
+                printf("Ошибка ввода. Завершение добавления.\n");
+                clearBuffer();
+                break;
+            }
+            clearBuffer();
+        } else {
+            // Если студент не был добавлен (например, из-за ошибки)
+            break;
+        }
+    } while (answer != 0);
+
+    if (studentCount > startCount) {
+        printf("Добавлено студентов: %d\n", studentCount - startCount);
     }
-
-    if (count > MAX_STUDENTS) {
-        printf("Превышено максимальное количество студентов.\n");
-        count = MAX_STUDENTS;
-    }
-
-    printf("Введите данные для %d студентов:\n", count);
-
-    for (int i = 0; i < count; i++) {
-        Student newStudent;
-        newStudent.id = i + 1;
-
-        printf("\n Студент %d:\n", i + 1);
-        printf("Введите ФИО студента: ");
-        fgets(newStudent.name, MAX_NAME, stdin);
-        newStudent.name[strcspn(newStudent.name, "\n")] = 0;
-
-        printf("Введите возраст студента: ");
-        scanf("%d", &newStudent.age);
-        clearBuffer();
-
-        printf("Введите группу студента: ");
-        fgets(newStudent.group, MAX_GROUP, stdin);
-        newStudent.group[strcspn(newStudent.group, "\n")] = 0;
-
-        printf("Введите телефон студента: ");
-        fgets(newStudent.phone, MAX_PHONE, stdin);
-        newStudent.phone[strcspn(newStudent.phone, "\n")] = 0;
-
-        students[studentCount++] = newStudent;
-    }
-
-    printf("Добавлено %d студентов.\n", count);
 }
+
+// Функция, которая удалит имеющийся файл с базой данных
+void deleteLoadedFile() {
+    printf("\nВы уверены, что хотите удалить файл с базой данных? (1 - да, 0 - нет): ");
+    if (scanf("%d", &studentCount) != 1) {
+        if (remove("students.dat") == 0) {
+            printf("Файл успешно удален.\n");
+        } else {
+            printf("Ошибка при удалении файла.\n");
+        }
+    } else {
+        // Если пользователь не подтвердил удаление
+        printf("Удаление отменено.\n");
+
+    }
+
+}
+
+
+// void addMultipleStudents() {
+//
+//     if (studentCount > 0) {
+//         printf("База данных не пуста. Добавление нескольких студентов невозможно.\n");
+//         return;
+//     }
+//
+//     printf("Введите данные студента:\n");
+//
+//     int answer = 1;
+//     int idCounter = 0;
+//     do {
+//         Student newStudent;
+//         newStudent.id = idCounter + 1;
+//
+//         printf("\n Студент %d:\n", idCounter + 1);
+//         printf("Введите ФИО студента: ");
+//         fgets(newStudent.name, MAX_NAME, stdin);
+//         newStudent.name[strcspn(newStudent.name, "\n")] = 0;
+//
+//         printf("Введите возраст студента: ");
+//         scanf("%d", &newStudent.age);
+//         clearBuffer();
+//
+//         printf("Введите группу студента: ");
+//         fgets(newStudent.group, MAX_GROUP, stdin);
+//         newStudent.group[strcspn(newStudent.group, "\n")] = 0;
+//
+//         printf("Введите телефон студента: ");
+//         fgets(newStudent.phone, MAX_PHONE, stdin);
+//         newStudent.phone[strcspn(newStudent.phone, "\n")] = 0;
+//
+//
+//         students[studentCount++] = newStudent;
+//
+//         printf("Желаете продолжить ввод? (1 - да, 0 - нет): ");
+//         scanf("%d", &answer);
+//         clearBuffer();
+//
+//         idCounter++;
+//
+//     } while ( answer != 0);
+//
+//     printf("Студенты добавлены. \n");
+// }
+
